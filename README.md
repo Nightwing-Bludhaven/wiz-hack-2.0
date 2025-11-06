@@ -13,8 +13,9 @@ so basically i got bored and decided to hack and dive into my Philips Wiz lights
 - sets any RGB color + brightness you want
 - comes with a clean web UI because clicking buttons > typing commands sometimes
 - FastAPI backend that actually works
+- **makes your lights react to music in real-time** (bass→red, mids→green, treble→blue)
 
-basically i went from "click app button" to "control my lights from terminal/browser/literally anywhere"
+basically i went from "click app button" to "control my lights from terminal/browser/literally anywhere" AND made them dance to music
 
 ## the tech stack (keeping it simple)
 
@@ -37,7 +38,7 @@ cd wiz-hack
 2. **install deps** (you need Python 3.10+)
 
 ```bash
-pip install fastapi uvicorn
+pip install -r requirements.txt
 ```
 
 3. **make sure you're on the same WiFi as your lights** (crucial, duh)
@@ -71,6 +72,60 @@ set it to purple (because why not):
 ```bash
 python wiz_control.py color 192.168.1.100 128 0 128
 ```
+
+## 🎵 audio visualizer mode (the fun part)
+
+okay this is where it gets insane. your lights react to music in real-time.
+
+**basic usage:**
+
+```bash
+python audio_visualizer.py
+```
+
+that's it. play some music, your lights will dance to it. bass makes it red, mids make it green, treble makes it blue.
+
+**different modes:**
+
+```bash
+# default - frequency bands mapped to RGB
+python audio_visualizer.py --mode frequency_bands
+
+# warm/cool colors based on energy
+python audio_visualizer.py --mode energy
+
+# rainbow colors based on dominant frequency
+python audio_visualizer.py --mode rainbow
+
+# multi-light mode - each light shows different frequency (sick for demos)
+python audio_visualizer.py --mode multi
+```
+
+**control specific lights:**
+
+```bash
+# auto-discover and use all lights
+python audio_visualizer.py --lights all
+
+# use specific light(s)
+python audio_visualizer.py --lights 192.168.1.100
+python audio_visualizer.py --lights 192.168.1.100,192.168.1.101
+```
+
+**how it works:**
+
+1. captures audio from your mic using `sounddevice`
+2. runs FFT (Fast Fourier Transform) to split into frequency bands
+3. bass (20-250Hz) → red, mids (250-4000Hz) → green, treble (4000-20000Hz) → blue
+4. sends RGB values to lights via UDP (~20-50ms latency)
+5. applies smoothing so colors don't jitter
+
+**demo tips for that viral video:**
+
+- use electronic music with clear bass drops
+- film in a dark room
+- show the terminal with frequency bars
+- multi-light mode looks absolutely insane on camera
 
 ## the API endpoints
 
@@ -110,11 +165,12 @@ shoutout to [sbidy/pywizlight](https://github.com/sbidy/pywizlight) for the unof
 
 ## things you can do with this
 
+- **audio visualizer mode** - make lights dance to music (bass/mid/treble → RGB)
 - integrate with your calendar (red light when in meeting)
-- sync with your music (RGB party mode)
 - create your own scenes with gradients and transitions
 - automate based on literally anything (weather, stocks, github commits)
 - impress your friends (or concern them)
+- throw RGB parties without expensive DJ equipment
 
 ## security note
 
