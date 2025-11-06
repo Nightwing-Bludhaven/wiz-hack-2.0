@@ -1,176 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wiz Light Control</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f0f0f0;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button.primary {
-            background: #4CAF50;
-            color: white;
-        }
-        button.danger {
-            background: #f44336;
-            color: white;
-        }
-        button.info {
-            background: #2196F3;
-            color: white;
-        }
-        button:hover {
-            opacity: 0.9;
-        }
-        .color-control {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            background: #e9ecef;
-        }
-        .color-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-        }
-        input[type="range"] {
-            width: 200px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+      button.primary {
+        background: #4caf50;
+        color: white;
+      }
+      button.danger {
+        background: #f44336;
+        color: white;
+      }
+      button.info {
+        background: #2196f3;
+        color: white;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      .color-control {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background: #e9ecef;
+      }
+      .color-preview {
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+      }
+      input[type="range"] {
+        width: 200px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Wiz Light Control</h1>
-        
-        <div class="button-group">
-            <button onclick="turnOn()" class="primary">Turn On</button>
-            <button onclick="turnOff()" class="danger">Turn Off</button>
-            <button onclick="getStatus()" class="info">Get Status</button>
-        </div>
+      <h1>Wiz Light Control</h1>
 
-        <div class="color-control">
-            <h2>Color Control</h2>
-            <div>
-                <label>Red: <span id="redValue">0</span></label>
-                <input type="range" min="0" max="255" value="0" id="red" oninput="updateColor()">
-            </div>
-            <div>
-                <label>Green: <span id="greenValue">0</span></label>
-                <input type="range" min="0" max="255" value="0" id="green" oninput="updateColor()">
-            </div>
-            <div>
-                <label>Blue: <span id="blueValue">0</span></label>
-                <input type="range" min="0" max="255" value="0" id="blue" oninput="updateColor()">
-            </div>
-            <div>
-                <label>Brightness: <span id="brightnessValue">100</span>%</label>
-                <input type="range" min="0" max="100" value="100" id="brightness" oninput="updateColor()">
-            </div>
-            <div class="color-preview" id="colorPreview"></div>
-            <button onclick="setColor()" class="primary">Set Color</button>
-        </div>
+      <div class="button-group">
+        <button onclick="turnOn()" class="primary">Turn On</button>
+        <button onclick="turnOff()" class="danger">Turn Off</button>
+        <button onclick="getStatus()" class="info">Get Status</button>
+      </div>
 
-        <div class="status" id="status"></div>
+      <div class="color-control">
+        <h2>Color Control</h2>
+        <div>
+          <label>Red: <span id="redValue">0</span></label>
+          <input
+            type="range"
+            min="0"
+            max="255"
+            value="0"
+            id="red"
+            oninput="updateColor()"
+          />
+        </div>
+        <div>
+          <label>Green: <span id="greenValue">0</span></label>
+          <input
+            type="range"
+            min="0"
+            max="255"
+            value="0"
+            id="green"
+            oninput="updateColor()"
+          />
+        </div>
+        <div>
+          <label>Blue: <span id="blueValue">0</span></label>
+          <input
+            type="range"
+            min="0"
+            max="255"
+            value="0"
+            id="blue"
+            oninput="updateColor()"
+          />
+        </div>
+        <div>
+          <label>Brightness: <span id="brightnessValue">100</span>%</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            id="brightness"
+            oninput="updateColor()"
+          />
+        </div>
+        <div class="color-preview" id="colorPreview"></div>
+        <button onclick="setColor()" class="primary">Set Color</button>
+      </div>
+
+      <div class="status" id="status"></div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+      const API_URL = "http://localhost:8000";
+      const SPEED_API_URL = "http://localhost:8000/light/192.168.0.133";
 
-        async function turnOn() {
-            const response = await fetch(`${API_URL}/on`, { method: 'POST' });
-            const data = await response.json();
-            updateStatus(data);
-        }
+      async function turnOn() {
+        const response = await fetch(`${SPEED_API_URL}/on`, { method: "POST" });
+        const data = await response.json();
+        updateStatus(data);
+      }
 
-        async function turnOff() {
-            const response = await fetch(`${API_URL}/off`, { method: 'POST' });
-            const data = await response.json();
-            updateStatus(data);
-        }
+      async function turnOff() {
+        const response = await fetch(`${SPEED_API_URL}/off`, {
+          method: "POST",
+        });
+        const data = await response.json();
+        updateStatus(data);
+      }
 
-        async function getStatus() {
-            const response = await fetch(`${API_URL}/status`);
-            const data = await response.json();
-            updateStatus(data);
-        }
+      async function getStatus() {
+        const response = await fetch(`${SPEED_API_URL}/status`);
+        const data = await response.json();
+        updateStatus(data);
+      }
 
-        async function setColor() {
-            const red = document.getElementById('red').value;
-            const green = document.getElementById('green').value;
-            const blue = document.getElementById('blue').value;
-            const brightness = document.getElementById('brightness').value;
+      async function setColor() {
+        const red = document.getElementById("red").value;
+        const green = document.getElementById("green").value;
+        const blue = document.getElementById("blue").value;
+        const brightness = document.getElementById("brightness").value;
 
-            const response = await fetch(`${API_URL}/color`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    r: parseInt(red),
-                    g: parseInt(green),
-                    b: parseInt(blue),
-                    brightness: parseInt(brightness)
-                })
-            });
-            const data = await response.json();
-            updateStatus(data);
-        }
+        const response = await fetch(`${SPEED_API_URL}/color`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            r: parseInt(red),
+            g: parseInt(green),
+            b: parseInt(blue),
+            brightness: parseInt(brightness),
+          }),
+        });
+        const data = await response.json();
+        updateStatus(data);
+      }
 
-        function updateColor() {
-            const red = document.getElementById('red').value;
-            const green = document.getElementById('green').value;
-            const blue = document.getElementById('blue').value;
-            
-            document.getElementById('redValue').textContent = red;
-            document.getElementById('greenValue').textContent = green;
-            document.getElementById('blueValue').textContent = blue;
-            document.getElementById('brightnessValue').textContent = document.getElementById('brightness').value;
-            
-            document.getElementById('colorPreview').style.backgroundColor = `rgb(${red},${green},${blue})`;
-        }
+      function updateColor() {
+        const red = document.getElementById("red").value;
+        const green = document.getElementById("green").value;
+        const blue = document.getElementById("blue").value;
 
-        function updateStatus(data) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        }
+        document.getElementById("redValue").textContent = red;
+        document.getElementById("greenValue").textContent = green;
+        document.getElementById("blueValue").textContent = blue;
+        document.getElementById("brightnessValue").textContent =
+          document.getElementById("brightness").value;
 
-        // Initialize color preview
-        updateColor();
+        document.getElementById(
+          "colorPreview"
+        ).style.backgroundColor = `rgb(${red},${green},${blue})`;
+      }
 
-        // Initial status check
-        getStatus();
+      function updateStatus(data) {
+        const statusDiv = document.getElementById("status");
+        statusDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+
+      // Initialize color preview
+      updateColor();
+
+      // Initial status check
+      getStatus();
     </script>
-</body>
+  </body>
 </html>
