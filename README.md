@@ -87,6 +87,7 @@ that's it. play some music, your lights will dance to it. bass makes it red, mid
 
 **different modes:**
 
+**color-focused modes** (default behavior - colors change with frequencies):
 ```bash
 # default - frequency bands mapped to RGB
 python audio_visualizer.py --mode frequency_bands
@@ -99,6 +100,21 @@ python audio_visualizer.py --mode rainbow
 
 # multi-light mode - each light shows different frequency (sick for demos)
 python audio_visualizer.py --mode multi
+```
+
+**brightness-focused modes** (NEW - makes the sync super obvious!):
+```bash
+# pulse mode - static warm color, brightness pulses with music
+# BEST for showing sync in videos - everyone instantly sees it
+python audio_visualizer.py --mode pulse
+
+# strobe mode - aggressive brightness flashes on beats
+# perfect for EDM/electronic music, looks INSANE
+python audio_visualizer.py --mode strobe
+
+# spectrum_pulse mode - subtle color hints + aggressive brightness
+# best of both worlds - bass=red, treble=blue, but brightness is the star
+python audio_visualizer.py --mode spectrum_pulse
 ```
 
 **control specific lights:**
@@ -125,6 +141,22 @@ python audio_visualizer.py --brightness-boost 3.0
 python audio_visualizer.py --brightness-boost 1.0
 ```
 
+**brightness range control** (constrain min/max brightness):
+
+```bash
+# subtle ambient (10-30% range) - won't blind you but still syncs
+python audio_visualizer.py --mode pulse --min-brightness 10 --max-brightness 30
+
+# always bright (60-100% range) - good for well-lit rooms
+python audio_visualizer.py --mode pulse --min-brightness 60 --max-brightness 100
+
+# maximum drama (5-100% range) - full dynamic range for dark room demos
+python audio_visualizer.py --mode strobe --min-brightness 5 --max-brightness 100
+
+# medium intensity (20-50% range) - perfect for background while working
+python audio_visualizer.py --mode spectrum_pulse --min-brightness 20 --max-brightness 50
+```
+
 **how it works:**
 
 1. captures audio from your mic using `sounddevice`
@@ -135,10 +167,13 @@ python audio_visualizer.py --brightness-boost 1.0
 
 **demo tips for that viral video:**
 
-- use electronic music with clear bass drops
-- film in a dark room
-- show the terminal with frequency bars
+- **use `pulse` or `strobe` mode** - the brightness sync is WAY more obvious than color changes
+- use electronic music with clear bass drops (skrillex, deadmau5, etc.)
+- film in a dark room (makes the brightness pulses super dramatic)
+- show the terminal with frequency bars + brightness indicator (💡)
+- `strobe` mode on beat drops = instant viral moment
 - multi-light mode looks absolutely insane on camera
+- pro tip: start with `pulse` mode, switch to `strobe` for the drop
 
 ## the API endpoints
 

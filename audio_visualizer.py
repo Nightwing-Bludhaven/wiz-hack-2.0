@@ -22,7 +22,13 @@ import threading
 import queue
 from wiz_control import WizLight
 from audio_analysis import AudioAnalyzer
-from color_mapping import FrequencyToRGBMapper, MultiLightMapper
+from color_mapping import (
+    FrequencyToRGBMapper,
+    MultiLightMapper,
+    PulseModeMapper,
+    StrobeModeMapper,
+    SpectrumPulseMapper,
+)
 
 
 class AudioVisualizer:
@@ -36,6 +42,8 @@ class AudioVisualizer:
         buffer_size=2048,
         smoothing=0.3,
         brightness_boost=1.5,
+        min_brightness=10,
+        max_brightness=100,
     ):
         """
         Initialize the visualizer.
@@ -47,6 +55,8 @@ class AudioVisualizer:
             buffer_size: Audio buffer size
             smoothing: Smoothing factor for colors
             brightness_boost: Brightness multiplier (default: 1.5)
+            min_brightness: Minimum brightness level (default: 10)
+            max_brightness: Maximum brightness level (default: 100)
         """
         self.light_ips = light_ips
         self.lights = [WizLight(ip) for ip in light_ips]
@@ -61,6 +71,12 @@ class AudioVisualizer:
         # Color mapping
         if mode == "multi" and len(light_ips) > 1:
             self.mapper = MultiLightMapper()
+        elif mode == "pulse":
+            self.mapper = PulseModeMapper(min_brightness=min_brightness, max_brightness=max_brightness)
+        elif mode == "strobe":
+            self.mapper = StrobeModeMapper(min_brightness=min_brightness, max_brightness=max_brightness)
+        elif mode == "spectrum_pulse":
+            self.mapper = SpectrumPulseMapper(brightness_emphasis=brightness_boost, min_brightness=min_brightness, max_brightness=max_brightness)
         else:
             self.mapper = FrequencyToRGBMapper(mode=mode, brightness_boost=brightness_boost)
 
@@ -141,7 +157,7 @@ class AudioVisualizer:
     def _print_visualization(self):
         """Print terminal visualization of current state."""
         # Clear line
-        print("\r" + " " * 100 + "\r", end="")
+        print("\r" + " " * 120 + "\r", end="")
 
         # Create ASCII bar graphs
         bass_bar = "█" * int(self.current_bass * 20)
@@ -152,13 +168,24 @@ class AudioVisualizer:
         RED = "\033[91m"
         GREEN = "\033[92m"
         BLUE = "\033[94m"
+        YELLOW = "\033[93m"
         RESET = "\033[0m"
 
-        # Print bars
+        # Get brightness for display
+        if isinstance(self.current_color, list):
+            # Multi-light mode
+            brightness = self.current_color[0][3] if self.current_color else 0
+        else:
+            brightness = self.current_color[3] if len(self.current_color) > 3 else 0
+
+        brightness_bar = "█" * int(brightness / 5)  # 0-100 -> 0-20 bars
+
+        # Print bars with brightness prominently displayed
         print(
             f"{RED}B:{bass_bar:<20}{RESET} "
             f"{GREEN}M:{mids_bar:<20}{RESET} "
-            f"{BLUE}T:{treble_bar:<20}{RESET}",
+            f"{BLUE}T:{treble_bar:<20}{RESET} "
+            f"{YELLOW}💡:{brightness_bar:<20} {brightness:3d}%{RESET}",
             end="",
             flush=True,
         )
@@ -170,7 +197,6 @@ class AudioVisualizer:
         print(f"Lights: {len(self.lights)} connected")
         print(f"Sample rate: {self.analyzer.sample_rate} Hz")
         print(f"Buffer size: {self.analyzer.buffer_size} samples")
-        print("\nListening to microphone... Press Ctrl+C to stop.\n")
 
         self.running = True
 
@@ -229,7 +255,7 @@ def main():
     )
     parser.add_argument(
         "--mode",
-        choices=["frequency_bands", "energy", "rainbow", "multi"],
+        choices=["frequency_bands", "energy", "rainbow", "multi", "pulse", "strobe", "spectrum_pulse"],
         default="frequency_bands",
         help="Color mapping mode (default: frequency_bands)",
     )
@@ -264,6 +290,18 @@ def main():
         help="Brightness multiplier - higher = brighter (default: 1.5, try 2.0-3.0 for max brightness)",
     )
     parser.add_argument(
+        "--min-brightness",
+        type=int,
+        default=10,
+        help="Minimum brightness percentage 0-100 (default: 10)",
+    )
+    parser.add_argument(
+        "--max-brightness",
+        type=int,
+        default=100,
+        help="Maximum brightness percentage 0-100 (default: 100)",
+    )
+    parser.add_argument(
         "--list-devices", action="store_true", help="List available audio devices"
     )
 
@@ -294,6 +332,8 @@ def main():
         buffer_size=args.buffer_size,
         smoothing=args.smoothing,
         brightness_boost=args.brightness_boost,
+        min_brightness=args.min_brightness,
+        max_brightness=args.max_brightness,
     )
 
     try:

@@ -247,3 +247,197 @@ class MultiLightMapper:
             colors.append((r, g, b, brightness))
 
         return colors
+
+
+class PulseModeMapper:
+    """
+    Brightness-focused mapper with static color.
+    Brightness pulses with music energy - makes sync super obvious.
+    """
+
+    def __init__(
+        self, base_color=(255, 200, 150), min_brightness=10, max_brightness=100
+    ):
+        """
+        Initialize pulse mode mapper.
+
+        Args:
+            base_color: RGB tuple for static color (default: warm white)
+            min_brightness: Minimum brightness level (default: 10)
+            max_brightness: Maximum brightness level (default: 100)
+        """
+        self.base_color = base_color
+        self.min_brightness = min_brightness
+        self.max_brightness = max_brightness
+
+    def map(self, bass, mids, treble, amplitude=None):
+        """
+        Map audio to static color with brightness pulse.
+
+        Args:
+            bass, mids, treble: Frequency intensities (not used much)
+            amplitude: Overall amplitude (primary driver)
+
+        Returns:
+            tuple: (r, g, b, brightness)
+        """
+        r, g, b = self.base_color
+
+        # Use overall energy to drive brightness
+        if amplitude is not None:
+            energy = amplitude
+        else:
+            # Fallback to average of frequency bands
+            energy = (bass + mids + treble) / 3
+
+        # Map energy to brightness within user-defined range
+        # Use power curve to make quiet parts visible but loud parts dramatic
+        brightness_range = self.max_brightness - self.min_brightness
+        brightness = int(
+            np.clip(
+                self.min_brightness + (energy**1.5) * brightness_range,
+                self.min_brightness,
+                self.max_brightness,
+            )
+        )
+
+        return r, g, b, brightness
+
+
+class StrobeModeMapper:
+    """
+    Aggressive strobe effect - brightness reacts HARD to beats.
+    No smoothing, dramatic swings within defined range.
+    """
+
+    def __init__(
+        self,
+        strobe_color=(255, 255, 255),
+        threshold=1.3,
+        min_brightness=5,
+        max_brightness=100,
+    ):
+        """
+        Initialize strobe mode mapper.
+
+        Args:
+            strobe_color: RGB tuple for strobe color (default: pure white)
+            threshold: Beat detection sensitivity (lower = more sensitive)
+            min_brightness: Minimum brightness level (default: 5)
+            max_brightness: Maximum brightness level (default: 100)
+        """
+        self.strobe_color = strobe_color
+        self.threshold = threshold
+        self.min_brightness = min_brightness
+        self.max_brightness = max_brightness
+        self.last_energy = 0.0
+
+    def map(self, bass, mids, treble, amplitude=None, is_beat=False):
+        """
+        Map audio to strobe effect.
+
+        Args:
+            bass, mids, treble: Frequency intensities
+            amplitude: Overall amplitude
+            is_beat: Beat detection flag (if available)
+
+        Returns:
+            tuple: (r, g, b, brightness)
+        """
+        r, g, b = self.strobe_color
+
+        # Calculate current energy
+        current_energy = (
+            amplitude if amplitude is not None else (bass + mids + treble) / 3
+        )
+
+        # Detect sudden energy increase (beat/transient)
+        energy_ratio = (
+            current_energy / self.last_energy if self.last_energy > 0.01 else 1.0
+        )
+        self.last_energy = (
+            current_energy * 0.7 + self.last_energy * 0.3
+        )  # Smooth tracking
+
+        # Strobe flash on energy spike
+        if energy_ratio > self.threshold or current_energy > 0.7:
+            # Flash to max!
+            brightness = self.max_brightness
+        else:
+            # Drop to low within range
+            low_brightness = int(
+                np.clip(
+                    current_energy * 40, self.min_brightness, self.max_brightness * 0.3
+                )
+            )
+            brightness = int(
+                np.clip(low_brightness, self.min_brightness, self.max_brightness)
+            )
+
+        return r, g, b, brightness
+
+
+class SpectrumPulseMapper:
+    """
+    Colors based on frequency content, but brightness is the main show.
+    Best of both worlds - see the frequency colors but the pulse is obvious.
+    """
+
+    def __init__(self, brightness_emphasis=2.0, min_brightness=5, max_brightness=100):
+        """
+        Initialize spectrum pulse mapper.
+
+        Args:
+            brightness_emphasis: How much to emphasize brightness (default: 2.0)
+            min_brightness: Minimum brightness level (default: 5)
+            max_brightness: Maximum brightness level (default: 100)
+        """
+        self.brightness_emphasis = brightness_emphasis
+        self.min_brightness = min_brightness
+        self.max_brightness = max_brightness
+
+    def map(self, bass, mids, treble, amplitude=None):
+        """
+        Map frequencies to colors, energy to brightness.
+
+        Args:
+            bass, mids, treble: Frequency intensities
+            amplitude: Overall amplitude
+
+        Returns:
+            tuple: (r, g, b, brightness)
+        """
+        # Find dominant frequency band
+        bands = [bass, mids, treble]
+        max_band = max(bands)
+
+        # Color based on frequency but SUBTLE
+        # We want the color to hint at the frequency, not dominate
+        if bass > mids and bass > treble:
+            # Bass dominant - red/purple tones
+            base_color = (200, 50, 150)
+        elif treble > bass and treble > mids:
+            # Treble dominant - cyan/blue tones
+            base_color = (50, 150, 255)
+        else:
+            # Mids dominant - yellow/orange tones
+            base_color = (255, 180, 50)
+
+        # Apply color at medium intensity (not full saturation)
+        r, g, b = [int(c * 0.8) for c in base_color]
+
+        # BRIGHTNESS is the star - driven by total energy
+        energy = amplitude if amplitude is not None else (bass + mids + treble) / 3
+
+        # Aggressive brightness scaling within user-defined range
+        brightness_range = self.max_brightness - self.min_brightness
+        brightness = int(
+            np.clip(
+                self.min_brightness
+                + (energy ** (1.0 / self.brightness_emphasis)) * brightness_range,
+                self.min_brightness,
+                self.max_brightness,
+            )
+        )
+
+        return r, g, b, brightness
