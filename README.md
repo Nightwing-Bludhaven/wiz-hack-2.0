@@ -112,6 +112,19 @@ python audio_visualizer.py --lights 192.168.1.100
 python audio_visualizer.py --lights 192.168.1.100,192.168.1.101
 ```
 
+**brightness control:**
+
+```bash
+# default brightness (1.5x boost)
+python audio_visualizer.py
+
+# max brightness mode (3x boost)
+python audio_visualizer.py --brightness-boost 3.0
+
+# subtle brightness (1x, no boost)
+python audio_visualizer.py --brightness-boost 1.0
+```
+
 **how it works:**
 
 1. captures audio from your mic using `sounddevice`

@@ -35,6 +35,7 @@ class AudioVisualizer:
         sample_rate=22050,
         buffer_size=2048,
         smoothing=0.3,
+        brightness_boost=1.5,
     ):
         """
         Initialize the visualizer.
@@ -45,6 +46,7 @@ class AudioVisualizer:
             sample_rate: Audio sample rate
             buffer_size: Audio buffer size
             smoothing: Smoothing factor for colors
+            brightness_boost: Brightness multiplier (default: 1.5)
         """
         self.light_ips = light_ips
         self.lights = [WizLight(ip) for ip in light_ips]
@@ -60,7 +62,7 @@ class AudioVisualizer:
         if mode == "multi" and len(light_ips) > 1:
             self.mapper = MultiLightMapper()
         else:
-            self.mapper = FrequencyToRGBMapper(mode=mode)
+            self.mapper = FrequencyToRGBMapper(mode=mode, brightness_boost=brightness_boost)
 
         # Threading for non-blocking light updates
         self.color_queue = queue.Queue(maxsize=1)
@@ -163,12 +165,12 @@ class AudioVisualizer:
 
     def start(self):
         """Start the audio visualizer."""
-        print(f"\n🎵 Audio Visualizer Starting...")
+        print("\n🎵 Audio Visualizer Starting...")
         print(f"Mode: {self.mode}")
         print(f"Lights: {len(self.lights)} connected")
         print(f"Sample rate: {self.analyzer.sample_rate} Hz")
         print(f"Buffer size: {self.analyzer.buffer_size} samples")
-        print(f"\nListening to microphone... Press Ctrl+C to stop.\n")
+        print("\nListening to microphone... Press Ctrl+C to stop.\n")
 
         self.running = True
 
@@ -256,6 +258,12 @@ def main():
         help="Color smoothing factor 0-1 (default: 0.3)",
     )
     parser.add_argument(
+        "--brightness-boost",
+        type=float,
+        default=1.5,
+        help="Brightness multiplier - higher = brighter (default: 1.5, try 2.0-3.0 for max brightness)",
+    )
+    parser.add_argument(
         "--list-devices", action="store_true", help="List available audio devices"
     )
 
@@ -285,6 +293,7 @@ def main():
         sample_rate=args.sample_rate,
         buffer_size=args.buffer_size,
         smoothing=args.smoothing,
+        brightness_boost=args.brightness_boost,
     )
 
     try:
