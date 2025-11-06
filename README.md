@@ -73,9 +73,14 @@ set it to purple (because why not):
 python wiz_control.py color 192.168.1.100 128 0 128
 ```
 
-## 🎵 audio visualizer mode (the fun part)
+## 🎵 audio & music visualizer modes (the fun part)
 
 okay this is where it gets insane. your lights react to music in real-time.
+
+### Two modes available:
+
+1. **`audio_visualizer.py`** - Uses your microphone (live music, any audio source)
+2. **`music_visualizer.py`** - Plays audio files (MP3/WAV/FLAC) with PERFECT sync
 
 **basic usage:**
 
@@ -190,15 +195,60 @@ python audio_visualizer.py --mode pulse \
 4. sends RGB values to lights via UDP (~20-50ms latency)
 5. applies smoothing so colors don't jitter
 
+---
+
+## 🎼 music file visualizer (PERFECT SYNC!)
+
+play audio files (MP3, WAV, FLAC) with lights perfectly synced - no microphone needed!
+
+**why use this instead of mic:**
+- perfect sync (no lag, no background noise)
+- same song = same light show every time
+- way better for demos and videos
+- cleaner audio analysis
+
+**basic usage:**
+
+```bash
+python music_visualizer.py --file song.mp3
+```
+
+**all visualizer options work:**
+
+```bash
+# your party mode case
+python music_visualizer.py --file edm.mp3 \
+  --mode spectrum_pulse \
+  --min-brightness 10 --max-brightness 30 \
+  --sensitivity 2.5 --smoothing 0.1
+
+# extreme strobe mode
+python music_visualizer.py --file dubstep.mp3 \
+  --mode strobe \
+  --sensitivity 3.0 --smoothing 0
+
+# loop for continuous party
+python music_visualizer.py --file party.mp3 --loop
+```
+
+**on-screen display:**
+- progress bar with time
+- frequency visualization
+- brightness indicator
+- all in real-time while music plays
+
+---
+
 **demo tips for that viral video:**
 
+- **USE `music_visualizer.py` for demos** - perfect sync every time
 - **use `pulse` or `strobe` mode** - the brightness sync is WAY more obvious than color changes
 - use electronic music with clear bass drops (skrillex, deadmau5, etc.)
 - film in a dark room (makes the brightness pulses super dramatic)
-- show the terminal with frequency bars + brightness indicator (💡)
+- show the terminal with progress bar + frequency bars
 - `strobe` mode on beat drops = instant viral moment
 - multi-light mode looks absolutely insane on camera
-- pro tip: start with `pulse` mode, switch to `strobe` for the drop
+- record the video, then overlay the terminal output for that hacker vibe
 
 ## the API endpoints
 
