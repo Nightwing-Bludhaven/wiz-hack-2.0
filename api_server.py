@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 import uvicorn
+import asyncio
 from wiz_control import WizLight
-import json
 
 app = FastAPI(title="Wiz Light Control API")
 
@@ -23,10 +23,12 @@ app.add_middleware(
 # Mount static files directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
 @app.get("/")
 async def root():
     """Serve the web interface"""
     return FileResponse("static/index.html")
+
 
 class ColorRequest(BaseModel):
     r: int
@@ -34,18 +36,22 @@ class ColorRequest(BaseModel):
     b: int
     brightness: Optional[int] = 100
 
+
 class LightResponse(BaseModel):
     success: bool
     message: str
     data: Optional[dict] = None
 
+
 async def get_first_light_ip():
     """Helper function to get the first available light's IP"""
     light = WizLight()
-    lights = light.discover()
+    # run the blocking discovery call in a thread and await the result
+    lights = await asyncio.get_running_loop().run_in_executor(None, light.discover)
     if not lights:
         raise HTTPException(status_code=404, detail="No lights found on network")
     return lights[0]["ip"]
+
 
 @app.get("/discover", response_model=LightResponse)
 async def discover_lights():
@@ -56,10 +62,11 @@ async def discover_lights():
         return {
             "success": True,
             "message": "Lights discovered successfully",
-            "data": {"lights": lights}
+            "data": {"lights": lights},
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/on", response_model=LightResponse)
 async def turn_on_first_light():
@@ -71,10 +78,11 @@ async def turn_on_first_light():
         return {
             "success": True,
             "message": f"Light {ip} turned on successfully",
-            "data": result
+            "data": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/off", response_model=LightResponse)
 async def turn_off_first_light():
@@ -86,10 +94,11 @@ async def turn_off_first_light():
         return {
             "success": True,
             "message": f"Light {ip} turned off successfully",
-            "data": result
+            "data": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/color", response_model=LightResponse)
 async def set_first_light_color(color: ColorRequest):
@@ -101,10 +110,11 @@ async def set_first_light_color(color: ColorRequest):
         return {
             "success": True,
             "message": f"Color set successfully for light {ip}",
-            "data": result
+            "data": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/status", response_model=LightResponse)
 async def get_first_light_status():
@@ -116,10 +126,11 @@ async def get_first_light_status():
         return {
             "success": True,
             "message": "Status retrieved successfully",
-            "data": status
+            "data": status,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/light/{ip}/status", response_model=LightResponse)
 async def get_light_status(ip: str):
@@ -130,10 +141,11 @@ async def get_light_status(ip: str):
         return {
             "success": True,
             "message": "Status retrieved successfully",
-            "data": status
+            "data": status,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/light/{ip}/on", response_model=LightResponse)
 async def turn_on_light(ip: str):
@@ -144,10 +156,11 @@ async def turn_on_light(ip: str):
         return {
             "success": True,
             "message": "Light turned on successfully",
-            "data": result
+            "data": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/light/{ip}/off", response_model=LightResponse)
 async def turn_off_light(ip: str):
@@ -158,10 +171,11 @@ async def turn_off_light(ip: str):
         return {
             "success": True,
             "message": "Light turned off successfully",
-            "data": result
+            "data": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/light/{ip}/color", response_model=LightResponse)
 async def set_light_color(ip: str, color: ColorRequest):
@@ -169,13 +183,10 @@ async def set_light_color(ip: str, color: ColorRequest):
     try:
         light = WizLight(ip)
         result = light.set_color(color.r, color.g, color.b, color.brightness)
-        return {
-            "success": True,
-            "message": "Color set successfully",
-            "data": result
-        }
+        return {"success": True, "message": "Color set successfully", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     # Run the server
@@ -183,5 +194,5 @@ if __name__ == "__main__":
         "api_server:app",
         host="0.0.0.0",  # Make accessible from other devices on network
         port=8000,
-        reload=True
+        reload=True,
     )
