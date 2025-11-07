@@ -42,8 +42,6 @@ class AudioVisualizer:
         buffer_size=2048,
         smoothing=0.3,
         brightness_boost=1.5,
-        min_brightness=10,
-        max_brightness=100,
         sensitivity=1.0,
     ):
         """
@@ -56,8 +54,6 @@ class AudioVisualizer:
             buffer_size: Audio buffer size
             smoothing: Smoothing factor for colors
             brightness_boost: Brightness multiplier (default: 1.5)
-            min_brightness: Minimum brightness level (default: 10)
-            max_brightness: Maximum brightness level (default: 100)
             sensitivity: How dramatically brightness reacts (default: 1.0)
         """
         self.light_ips = light_ips
@@ -75,21 +71,15 @@ class AudioVisualizer:
             self.mapper = MultiLightMapper()
         elif mode == "pulse":
             self.mapper = PulseModeMapper(
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         elif mode == "strobe":
             self.mapper = StrobeModeMapper(
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         elif mode == "spectrum_pulse":
             self.mapper = SpectrumPulseMapper(
                 brightness_emphasis=brightness_boost,
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         else:
@@ -313,18 +303,6 @@ def main():
         help="Brightness multiplier - higher = brighter (default: 1.5, try 2.0-3.0 for max brightness)",
     )
     parser.add_argument(
-        "--min-brightness",
-        type=int,
-        default=10,
-        help="Minimum brightness percentage 0-100 (default: 10)",
-    )
-    parser.add_argument(
-        "--max-brightness",
-        type=int,
-        default=100,
-        help="Maximum brightness percentage 0-100 (default: 100)",
-    )
-    parser.add_argument(
         "--sensitivity",
         type=float,
         default=1.0,
@@ -361,8 +339,6 @@ def main():
         buffer_size=args.buffer_size,
         smoothing=args.smoothing,
         brightness_boost=args.brightness_boost,
-        min_brightness=args.min_brightness,
-        max_brightness=args.max_brightness,
         sensitivity=args.sensitivity,
     )
 

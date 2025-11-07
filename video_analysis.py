@@ -140,19 +140,17 @@ class VideoAnalyzer:
 class SceneBrightnessAnalyzer:
     """Analyzes scene brightness for dynamic brightness control."""
 
-    def __init__(self, min_brightness=10, max_brightness=100, smoothing=0.5):
+    def __init__(self, smoothing=0.5):
         """
         Initialize brightness analyzer.
 
         Args:
-            min_brightness: Minimum brightness level
-            max_brightness: Maximum brightness level
             smoothing: Smoothing factor for brightness transitions
         """
-        self.min_brightness = min_brightness
-        self.max_brightness = max_brightness
+        self.min_brightness = 10
+        self.max_brightness = 100
         self.smoothing = smoothing
-        self.last_brightness = min_brightness
+        self.last_brightness = self.min_brightness
 
     def analyze_brightness(self, frame):
         """

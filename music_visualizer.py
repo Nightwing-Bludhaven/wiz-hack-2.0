@@ -37,8 +37,6 @@ class MusicVisualizer:
         mode="frequency_bands",
         smoothing=0.3,
         brightness_boost=1.5,
-        min_brightness=10,
-        max_brightness=100,
         sensitivity=1.0,
         loop=False,
     ):
@@ -51,8 +49,6 @@ class MusicVisualizer:
             mode: Color mapping mode
             smoothing: Smoothing factor for colors
             brightness_boost: Brightness multiplier
-            min_brightness: Minimum brightness level
-            max_brightness: Maximum brightness level
             sensitivity: How dramatically brightness reacts
             loop: Whether to loop the song
         """
@@ -91,21 +87,15 @@ class MusicVisualizer:
             self.mapper = MultiLightMapper()
         elif mode == "pulse":
             self.mapper = PulseModeMapper(
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         elif mode == "strobe":
             self.mapper = StrobeModeMapper(
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         elif mode == "spectrum_pulse":
             self.mapper = SpectrumPulseMapper(
                 brightness_emphasis=brightness_boost,
-                min_brightness=min_brightness,
-                max_brightness=max_brightness,
                 sensitivity=sensitivity,
             )
         else:
@@ -361,18 +351,6 @@ def main():
         help="Brightness multiplier (default: 1.5)",
     )
     parser.add_argument(
-        "--min-brightness",
-        type=int,
-        default=10,
-        help="Minimum brightness 0-100 (default: 10)",
-    )
-    parser.add_argument(
-        "--max-brightness",
-        type=int,
-        default=100,
-        help="Maximum brightness 0-100 (default: 100)",
-    )
-    parser.add_argument(
         "--sensitivity",
         type=float,
         default=1.0,
@@ -410,8 +388,6 @@ def main():
         mode=args.mode,
         smoothing=args.smoothing,
         brightness_boost=args.brightness_boost,
-        min_brightness=args.min_brightness,
-        max_brightness=args.max_brightness,
         sensitivity=args.sensitivity,
         loop=args.loop,
     )

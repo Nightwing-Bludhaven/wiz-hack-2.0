@@ -258,8 +258,6 @@ class PulseModeMapper:
     def __init__(
         self,
         base_color=(255, 200, 150),
-        min_brightness=10,
-        max_brightness=100,
         sensitivity=1.0,
     ):
         """
@@ -267,13 +265,11 @@ class PulseModeMapper:
 
         Args:
             base_color: RGB tuple for static color (default: warm white)
-            min_brightness: Minimum brightness level (default: 10)
-            max_brightness: Maximum brightness level (default: 100)
             sensitivity: How dramatically brightness reacts (default: 1.0, higher = more dramatic)
         """
         self.base_color = base_color
-        self.min_brightness = min_brightness
-        self.max_brightness = max_brightness
+        self.min_brightness = 10
+        self.max_brightness = 100
         self.sensitivity = sensitivity
 
     def map(self, bass, mids, treble, amplitude=None):
@@ -321,8 +317,6 @@ class StrobeModeMapper:
         self,
         strobe_color=(255, 255, 255),
         threshold=1.3,
-        min_brightness=5,
-        max_brightness=100,
         sensitivity=1.0,
     ):
         """
@@ -331,15 +325,13 @@ class StrobeModeMapper:
         Args:
             strobe_color: RGB tuple for strobe color (default: pure white)
             threshold: Beat detection sensitivity (lower = more sensitive)
-            min_brightness: Minimum brightness level (default: 5)
-            max_brightness: Maximum brightness level (default: 100)
             sensitivity: How dramatically brightness reacts (default: 1.0, higher = more dramatic)
         """
         self.strobe_color = strobe_color
         # Adjust threshold based on sensitivity: higher sensitivity = easier to trigger
         self.threshold = threshold / sensitivity if sensitivity > 0 else threshold
-        self.min_brightness = min_brightness
-        self.max_brightness = max_brightness
+        self.min_brightness = 5
+        self.max_brightness = 100
         self.last_energy = 0.0
 
     def map(self, bass, mids, treble, amplitude=None, is_beat=False):
@@ -396,8 +388,6 @@ class SpectrumPulseMapper:
     def __init__(
         self,
         brightness_emphasis=2.0,
-        min_brightness=5,
-        max_brightness=100,
         sensitivity=1.0,
     ):
         """
@@ -405,13 +395,11 @@ class SpectrumPulseMapper:
 
         Args:
             brightness_emphasis: How much to emphasize brightness (default: 2.0)
-            min_brightness: Minimum brightness level (default: 5)
-            max_brightness: Maximum brightness level (default: 100)
             sensitivity: How dramatically brightness reacts (default: 1.0, higher = more dramatic)
         """
         self.brightness_emphasis = brightness_emphasis
-        self.min_brightness = min_brightness
-        self.max_brightness = max_brightness
+        self.min_brightness = 5
+        self.max_brightness = 100
         self.sensitivity = sensitivity
 
     def map(self, bass, mids, treble, amplitude=None):

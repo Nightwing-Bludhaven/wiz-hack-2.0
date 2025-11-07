@@ -146,34 +146,15 @@ python audio_visualizer.py --brightness-boost 3.0
 python audio_visualizer.py --brightness-boost 1.0
 ```
 
-**brightness range control** (constrain min/max brightness):
-
-```bash
-# subtle ambient (10-30% range) - won't blind you but still syncs
-python audio_visualizer.py --mode pulse --min-brightness 10 --max-brightness 30
-
-# always bright (60-100% range) - good for well-lit rooms
-python audio_visualizer.py --mode pulse --min-brightness 60 --max-brightness 100
-
-# maximum drama (5-100% range) - full dynamic range for dark room demos
-python audio_visualizer.py --mode strobe --min-brightness 5 --max-brightness 100
-
-# medium intensity (20-50% range) - perfect for background while working
-python audio_visualizer.py --mode spectrum_pulse --min-brightness 20 --max-brightness 50
-```
-
 **sensitivity control** (make brightness changes MORE dramatic):
 
 ```bash
-# YOUR CASE - full party mode with 10-30% range but DRAMATIC swings
-# sensitivity=2.5 makes it use the FULL 10-30% range aggressively
+# dramatic party mode with aggressive swings
 python audio_visualizer.py --mode spectrum_pulse \
-  --min-brightness 10 --max-brightness 30 \
   --sensitivity 2.5 --smoothing 0.1
 
-# extreme party strobe (full range, max sensitivity, no smoothing)
+# extreme party strobe (max sensitivity, no smoothing)
 python audio_visualizer.py --mode strobe \
-  --min-brightness 5 --max-brightness 100 \
   --sensitivity 3.0 --smoothing 0
 
 # subtle but noticeable (lower sensitivity)
@@ -216,10 +197,9 @@ python music_visualizer.py --file song.mp3
 **all visualizer options work:**
 
 ```bash
-# your party mode case
+# party mode with dramatic swings
 python music_visualizer.py --file edm.mp3 \
   --mode spectrum_pulse \
-  --min-brightness 10 --max-brightness 30 \
   --sensitivity 2.5 --smoothing 0.1
 
 # extreme strobe mode
@@ -292,9 +272,6 @@ python video_visualizer.py --file video.mp4 --mode edge_analysis --edge-thicknes
 
 # color smoothing - prevent jarring color jumps
 python video_visualizer.py --file video.mp4 --color-smoothing 0.7
-
-# brightness range control
-python video_visualizer.py --file video.mp4 --min-brightness 20 --max-brightness 80
 
 # run lights-only mode (no video window, great for projectors)
 python video_visualizer.py --file video.mp4 --no-display

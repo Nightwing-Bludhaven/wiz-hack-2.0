@@ -44,8 +44,6 @@ class VideoVisualizer:
         mode="dominant_color",
         edge_thickness=0.15,
         color_smoothing=0.5,
-        min_brightness=10,
-        max_brightness=100,
         brightness_from_audio=False,
         display_video=True,
     ):
@@ -58,8 +56,6 @@ class VideoVisualizer:
             mode: Analysis mode
             edge_thickness: Edge thickness for edge_analysis mode
             color_smoothing: Color transition smoothing (0.0-1.0)
-            min_brightness: Minimum brightness level
-            max_brightness: Maximum brightness level
             brightness_from_audio: Use audio for brightness control
             display_video: Whether to display the video window
         """
@@ -96,8 +92,6 @@ class VideoVisualizer:
 
         # Brightness analyzer
         self.brightness_analyzer = SceneBrightnessAnalyzer(
-            min_brightness=min_brightness,
-            max_brightness=max_brightness,
             smoothing=color_smoothing,
         )
 
@@ -462,18 +456,6 @@ def main():
         help="Color transition smoothing 0-1 (default: 0.5)",
     )
     parser.add_argument(
-        "--min-brightness",
-        type=int,
-        default=10,
-        help="Minimum brightness 0-100 (default: 10)",
-    )
-    parser.add_argument(
-        "--max-brightness",
-        type=int,
-        default=100,
-        help="Maximum brightness 0-100 (default: 100)",
-    )
-    parser.add_argument(
         "--audio-brightness",
         action="store_true",
         help="Use audio track for brightness control (hybrid mode)",
@@ -516,8 +498,6 @@ def main():
         mode=args.mode,
         edge_thickness=args.edge_thickness,
         color_smoothing=args.color_smoothing,
-        min_brightness=args.min_brightness,
-        max_brightness=args.max_brightness,
         brightness_from_audio=args.audio_brightness,
         display_video=not args.no_display,
     )
