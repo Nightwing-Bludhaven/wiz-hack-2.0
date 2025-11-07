@@ -14,7 +14,6 @@ Modes:
 """
 
 import sounddevice as sd
-import numpy as np
 import sys
 import argparse
 import time
@@ -115,6 +114,7 @@ class AudioVisualizer:
                         try:
                             light.set_color(r, g, b, brightness)
                         except Exception as e:
+                            print(e)
                             pass  # Ignore network errors
                 else:
                     # Single color for all lights
@@ -123,6 +123,7 @@ class AudioVisualizer:
                         try:
                             light.set_color(r, g, b, brightness)
                         except Exception as e:
+                            print(e)
                             pass  # Ignore network errors
 
                 self.update_count += 1
