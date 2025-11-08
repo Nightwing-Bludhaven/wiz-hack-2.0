@@ -414,15 +414,15 @@ class SpectrumPulseMapper:
             tuple: (r, g, b, brightness)
         """
         # Find dominant frequency band
-        bands = {'bass': bass, 'mids': mids, 'treble': treble}
+        bands = {"bass": bass, "mids": mids, "treble": treble}
         dominant = max(bands, key=bands.get)
 
         # Color based on frequency but SUBTLE
         # We want the color to hint at the frequency, not dominate
-        if dominant == 'bass':
+        if dominant == "bass":
             # Bass dominant - red/purple tones
             base_color = (200, 50, 150)
-        elif dominant == 'treble':
+        elif dominant == "treble":
             # Treble dominant - cyan/blue tones
             base_color = (50, 150, 255)
         else:

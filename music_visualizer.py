@@ -216,14 +216,14 @@ class MusicVisualizer:
         print(f"{GREEN}Mids:   {mids_bar:<10}{RESET}")
         print(f"{BLUE}Treble: {treble_bar:<10}{RESET}")
         print(f"{YELLOW}Bright: {brightness_bar:<10} {brightness:3d}%{RESET}")
-        print(f"\nControls: [Space] Pause | [Q] Quit | [R] Restart")
+        print("\nControls: [Space] Pause | [Q] Quit | [R] Restart")
 
     def start(self):
         """Start playing the music with light visualization."""
         self.running = True
         self.current_position = 0
 
-        print(f"\n🎵 Starting playback...")
+        print("\n🎵 Starting playback...")
         print(f"Mode: {self.mode}")
         print(f"Lights: {len(self.lights)} connected")
 
@@ -231,7 +231,7 @@ class MusicVisualizer:
         stream = sd.OutputStream(
             samplerate=self.sample_rate,
             channels=1,
-            dtype='float32',
+            dtype="float32",
         )
 
         stream.start()
@@ -246,25 +246,31 @@ class MusicVisualizer:
                     if self.current_position + chunk_size > self.total_samples:
                         if self.loop:
                             # Loop back to start
-                            remaining = chunk_size - (self.total_samples - self.current_position)
-                            chunk = np.concatenate([
-                                self.audio_data[self.current_position:],
-                                self.audio_data[:remaining]
-                            ])
+                            remaining = chunk_size - (
+                                self.total_samples - self.current_position
+                            )
+                            chunk = np.concatenate(
+                                [
+                                    self.audio_data[self.current_position :],
+                                    self.audio_data[:remaining],
+                                ]
+                            )
                             self.current_position = remaining
                         else:
                             # End of song
-                            chunk = self.audio_data[self.current_position:]
+                            chunk = self.audio_data[self.current_position :]
                             self.current_position = self.total_samples
-                            stream.write(chunk.astype('float32'))
+                            stream.write(chunk.astype("float32"))
                             self._process_audio_chunk(chunk)
                             break
                     else:
-                        chunk = self.audio_data[self.current_position:self.current_position + chunk_size]
+                        chunk = self.audio_data[
+                            self.current_position : self.current_position + chunk_size
+                        ]
                         self.current_position += chunk_size
 
                     # Play audio
-                    stream.write(chunk.astype('float32'))
+                    stream.write(chunk.astype("float32"))
 
                     # Process for lights
                     self._process_audio_chunk(chunk)
@@ -309,9 +315,7 @@ def discover_lights():
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Music file visualizer for Wiz lights"
-    )
+    parser = argparse.ArgumentParser(description="Music file visualizer for Wiz lights")
     parser.add_argument(
         "--file",
         type=str,
@@ -366,6 +370,7 @@ def main():
 
     # Check if file exists
     import os
+
     if not os.path.exists(args.file):
         print(f"❌ Error: File not found: {args.file}")
         sys.exit(1)
@@ -397,6 +402,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
