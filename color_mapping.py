@@ -452,3 +452,67 @@ class SpectrumPulseMapper:
         )
 
         return r, g, b, brightness
+
+
+class SimplePulseMapper:
+    """
+    Minimal, punchy, safe brightness driver.
+    - Auto-gain with decaying peak
+    - Noise gate
+    - Slew-rate limit (prevents flashblind spikes)
+    """
+
+    def __init__(
+        self,
+        min_brightness=10,
+        max_brightness=70,
+        peak_decay=0.985,  # slower decay = steadier AGC (lower = more volatile)
+        gamma=0.9,  # <1 = punchier mid; >1 = calmer
+        noise_gate=0.05,  # fraction of peak under which we output min brightness
+        max_step=8,
+    ):  # max brightness change per update (in % points)
+        self.min_b = int(min_brightness)
+        self.max_b = int(max_brightness)
+        self.peak_decay = float(peak_decay)
+        self.gamma = float(gamma)
+        self.noise_gate = float(noise_gate)
+        self.max_step = int(max_step)
+        self._peak = 0.2  # start with a sane peak
+        self._prev_b = self.min_b
+        self._last_rgb = (220, 120, 60)  # warm default
+
+    def _pick_color(self, bass, mids, treble):
+        # Dominant band hint, but keep saturation moderate
+        if bass >= mids and bass >= treble:  # bass -> magenta/red
+            base = (200, 60, 140)
+        elif treble >= mids:  # treble -> cyan/blue
+            base = (70, 180, 255)
+        else:  # mids -> amber
+            base = (255, 180, 70)
+        # Light smoothing of hue changes
+        r = int(0.8 * base[0] + 0.2 * self._last_rgb[0])
+        g = int(0.8 * base[1] + 0.2 * self._last_rgb[1])
+        b = int(0.8 * base[2] + 0.2 * self._last_rgb[2])
+        self._last_rgb = (r, g, b)
+        return self._last_rgb
+
+    def map(self, bass, mids, treble, amplitude):
+        # 1) Auto-gain peak tracking (decays slowly)
+        level = float(np.clip(amplitude, 0.0, 1.0))
+        self._peak = max(level, self._peak * self.peak_decay)
+
+        # 2) Noise gate relative to peak
+        if self._peak <= 1e-6 or level < self.noise_gate * self._peak:
+            target_b = self.min_b
+        else:
+            norm = np.clip(level / (self._peak + 1e-6), 0.0, 1.0)
+            shaped = norm**self.gamma
+            target_b = int(self.min_b + shaped * (self.max_b - self.min_b))
+
+        # 3) Slew-rate limit (cap how fast brightness can move)
+        delta = np.clip(target_b - self._prev_b, -self.max_step, self.max_step)
+        brightness = int(np.clip(self._prev_b + delta, self.min_b, self.max_b))
+        self._prev_b = brightness
+
+        r, g, b = self._pick_color(bass, mids, treble)
+        return r, g, b, brightness
