@@ -9,39 +9,58 @@ class WizLight:
         self.ip = ip
         self.port = 38899
 
-    def send_command(self, method, params=None):
-        """Send UDP command to light"""
+    def send_command(self, method, params=None, wait_for_response=True):
+        """
+        Send UDP command to light.
+        
+        Args:
+            method (str): The Wiz API method (e.g., setPilot)
+            params (dict): Parameters for the method
+            wait_for_response (bool): If False, sends "fire & forget" (OPTIMIZADO PARA WIFI 2.4GHz)
+        """
         if params is None:
             params = {}
 
         message = {"id": 1, "method": method, "params": params}
+        json_command = json.dumps(message).encode()
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        if self.ip:
-            # Send to specific light
-            sock.sendto(json.dumps(message).encode(), (self.ip, self.port))
-            sock.settimeout(1)
-            try:
-                response, _ = sock.recvfrom(1024)
-                return json.loads(response.decode())
-            except socket.timeout:
-                return {"error": "No response from light"}
-        else:
-            # Broadcast to discover lights
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.sendto(json.dumps(message).encode(), ("255.255.255.255", self.port))
+        
+        try:
+            if self.ip:
+                # Send to specific light
+                sock.sendto(json_command, (self.ip, self.port))
+                
+                if wait_for_response:
+                    sock.settimeout(0.5) # Timeout optimizado para Wiz 8.5W
+                    try:
+                        response, _ = sock.recvfrom(1024)
+                        return json.loads(response.decode())
+                    except socket.timeout:
+                        return {"error": "Timeout waiting for light"}
+                    except Exception as e:
+                        return {"error": str(e)}
+                else:
+                    # Modo "Music Visualizer": No esperamos respuesta para reducir LAG en 2.4GHz
+                    return {"success": True, "info": "Command sent (no wait)"}
+            else:
+                # Broadcast (Discover) - Siempre necesita respuesta
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                sock.sendto(json_command, ("255.255.255.255", self.port))
 
-            lights = []
-            sock.settimeout(2)
-            while True:
-                try:
-                    response, addr = sock.recvfrom(1024)
-                    lights.append(
-                        {"ip": addr[0], "response": json.loads(response.decode())}
-                    )
-                except socket.timeout:
-                    break
-            return lights
+                lights = []
+                sock.settimeout(2.0)
+                while True:
+                    try:
+                        response, addr = sock.recvfrom(1024)
+                        resp_json = json.loads(response.decode())
+                        if not any(l['ip'] == addr[0] for l in lights):
+                            lights.append({"ip": addr[0], "response": resp_json})
+                    except socket.timeout:
+                        break
+                return lights
+        finally:
+            sock.close()
 
     def discover(self):
         """Discover lights on network"""
@@ -56,9 +75,25 @@ class WizLight:
         return self.send_command("setState", {"state": state})
 
     def set_color(self, r, g, b, brightness=100):
-        """Set light color and brightness"""
+        """
+        Set light color and brightness.
+        AUTOMÁTICAMENTE EN MODO RÁPIDO (FIRE & FORGET)
+        """
+        # Wiz usa dimming 10-100. Si viene en 255, lo normalizamos.
+        if brightness > 100:
+            brightness = int((brightness / 255) * 100)
+        
+        # Seguridad para tus Wiz 8.5W
+        brightness = max(10, min(100, int(brightness)))
+        r = max(0, min(255, int(r)))
+        g = max(0, min(255, int(g)))
+        b = max(0, min(255, int(b)))
+
+        # Aquí está la magia: wait_for_response=False
         return self.send_command(
-            "setPilot", {"r": r, "g": g, "b": b, "dimming": brightness}
+            "setPilot", 
+            {"r": r, "g": g, "b": b, "dimming": brightness},
+            wait_for_response=False 
         )
 
 
@@ -111,6 +146,7 @@ def main():
         g = int(sys.argv[4])
         b = int(sys.argv[5])
         light = WizLight(ip)
+        # En modo manual sí esperamos respuesta para ver el JSON
         print(json.dumps(light.set_color(r, g, b), indent=2))
 
     else:
